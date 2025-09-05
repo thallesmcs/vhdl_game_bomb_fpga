@@ -1,0 +1,15 @@
+# Excluir pasta bomba_new
+bomba_new/
+
+# Excluir arquivos .ucf
+*.ucf
+
+# Arquivos temporários e de compilação
+*.log
+*.tmp
+*.bak
+*.backup
+
+# Arquivos de sistema
+Thumbs.db
+.DS_Store
