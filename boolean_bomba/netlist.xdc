@@ -47,6 +47,10 @@ set_property -dict {PACKAGE_PIN A4 IOSTANDARD LVCMOS33} [get_ports {led[15]}]
 set_property -dict {PACKAGE_PIN J5 IOSTANDARD LVCMOS33} [get_ports {btn1}]
 set_property -dict {PACKAGE_PIN J1 IOSTANDARD LVCMOS33} [get_ports {btn3}]
 
+# Reset
+set_property -dict {PACKAGE_PIN H2 IOSTANDARD LVCMOS33} [get_ports {system_reset}]
+
+
 # On-board 7-Segment display 0
 set_property -dict {PACKAGE_PIN D5 IOSTANDARD LVCMOS33} [get_ports {an[0]}]
 set_property -dict {PACKAGE_PIN C4 IOSTANDARD LVCMOS33} [get_ports {an[1]}]

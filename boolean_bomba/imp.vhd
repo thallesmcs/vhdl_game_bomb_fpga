@@ -30,7 +30,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity imp is
-    Port ( clock, btn3, btn1 : in  STD_LOGIC;
+    Port ( clock, btn3, btn1, system_reset : in  STD_LOGIC;
            switch : in  STD_LOGIC_VECTOR (15 downto 0);
            led : out  STD_LOGIC_VECTOR (15 downto 0);
            cx : out  STD_LOGIC_VECTOR (7 downto 0);
@@ -76,7 +76,7 @@ end component;
 
 
 component rand_gen is
-    Port ( clock, clock_2, clock_3, clock_4, btn3 : in  STD_LOGIC;
+    Port ( clk, clock, clock_2, clock_3, clock_4, btn3 : in  STD_LOGIC;
            q_n, q : out  STD_LOGIC_VECTOR (15 downto 0));
 end component;
 
@@ -101,11 +101,11 @@ conversor : component bin_bcd
 		bin => qr(15 downto 0),
 		bcd => binario_aleatorio(15 downto 0));
 
--- binario_aleatorio(15) <= '0'; -- Bit mais significativo zerado
+
 
 comparador : component comparator 
     Port map(
-		a => binario_aleatorio,
+		a => qr,
 		b => sw_s,
 		btn1 => btn1,
 		comp => confirmador);
@@ -118,7 +118,7 @@ switch_map : component swf
 divisor : component div_f
 	port map(
 		clk_d => clock,
-		reset => btn3,
+		reset => system_reset,
 		clk_1 => clk_1,
 		clk_3 => clk_3,
 		clk_4 => clk_4,
@@ -134,6 +134,7 @@ countdown : component countdowni
 				
 gerador : component rand_gen
 	port map(
+		clk => clock,
 		clock => clk_250,
 		clock_2 => clk_3,
 		clock_3 => clk_4,
@@ -142,14 +143,17 @@ gerador : component rand_gen
 		q => qr,
 		btn3 => btn3);
 
-led <= led_s;
+led <= qr;
 an <= an_s1;
 sw_s <= switch;
 cx <= cx_s1;
 an1 <= an_s2;
 cx1 <= cx_s2;
--- qr <= "0001101110001011";
-qr <= "0000000000000001";
+-- qr <= "0001101110001011"; -- Decimal: 7051 -- BCD: 0111 0000 0101 0001 Binario: 0001101110001011
+-- qr <= "0000001000100110";
+-- qr <= "0000000000000001";
+
+binario_aleatorio(15) <= '0'; -- Bit mais significativo zerado
 
 process(clk_250)
 variable conta4 : integer := 1 ;
@@ -189,12 +193,12 @@ begin
 	if rising_edge(clk_250) then
 	
 		if(conta8 = 1) then
-			cx_s2 <= disp8;		--8
+			cx_s2 <= disp7;		--8
 			an_s2 <= "0111";
 			conta8 := conta8 + 1;
 
 		elsif(conta8 = 2) then
-			cx_s2 <= disp7; 	--7
+			cx_s2 <= disp8; 	--7
 			an_s2 <= "1011";
 			conta8 := conta8 + 1;
 
@@ -219,14 +223,25 @@ process(clk_250, qc, qr, chave, binario_aleatorio, sw_s, confirmador)
 	if (btn1 = '1' ) then
 		chave <= '0';
 	end if;
-		
-		
-	if(qc = "0000000001000001") then
+
+	-- Quando o tempo chega a 00 (zero), mostrar FF nos displays 0, 1, 5 e 6
+	if(qc = "00000000") then
+		disp0 <= "10001110"; --FF
+		disp1 <= "10001110"; --FF
+		disp5 <= "10001110"; --FF
+		disp6 <= "10001110"; --FF
+	elsif(qc = "0000000001000001") then
 		disp0 <= "10001110"; 
 		disp1 <= "10001110"; 
+		disp5 <= "10001110"; 
+		disp6 <= "10001110";
 	else
 	
 	if(chave = '1') then
+		-- Durante a contagem, disp5 e disp6 ficam apagados (tudo 1)
+		disp5 <= "11111111"; --APAGADO
+		disp6 <= "11111111"; --APAGADO
+		
 		case qc(3 downto 0) is
 			when "0000" => disp0 <= "11000000"; --0
 			when "0001" => disp0 <= "10010000"; --9
@@ -250,18 +265,26 @@ process(clk_250, qc, qr, chave, binario_aleatorio, sw_s, confirmador)
 		end case;
 	elsif(chave = '0') then
 		case confirmador is
-			when '0' => disp0 <= "10001110"; 
-							disp1 <= "10001110"; 
-			when '1' => disp0 <= "10000010";
-							disp1 <= "10000010";
+			when '0' => disp0 <= "10001110"; --FF
+							disp1 <= "10001110"; --FF
+							-- Quando disp0 e disp1 são FF, disp5 e disp6 também são FF
+							disp5 <= "10001110"; --FF
+							disp6 <= "10001110"; --FF
+			when '1' => disp0 <= "10000010"; --GG
+							disp1 <= "10000010"; --GG
+							-- Quando disp0 e disp1 são GG, disp5 e disp6 também são GG
+							disp5 <= "10000010"; --GG
+							disp6 <= "10000010"; --GG
 			when others => disp1 <= "11111111";
 								disp0 <= "11111111";
+								disp5 <= "11111111";
+								disp6 <= "11111111";
 		end case;
 	end if;
 end if;
 
 
-	case qr(3 downto 0) is
+	case binario_aleatorio(3 downto 0) is
 		when "0000" => disp2 <= "11000000"; --0
 		when "0001" => disp2 <= "11111001"; --1
 		when "0010" => disp2 <= "10100100"; --2
@@ -275,7 +298,7 @@ end if;
 		when others => disp2 <= "11111111"; --APAGADO
 	end case;
 	
-	case qr(7 downto 4) is
+	case binario_aleatorio(7 downto 4) is
 		when "0000" => disp3 <= "11000000"; --0
 		when "0001" => disp3 <= "11111001"; --1
 		when "0010" => disp3 <= "10100100"; --2
@@ -289,7 +312,7 @@ end if;
 		when others => disp3 <= "11111111"; --APAGADO
 	end case;
 
-		case qr(11 downto 8) is
+		case binario_aleatorio(11 downto 8) is
 		when "0000" => disp8 <= "11000000"; --0
 		when "0001" => disp8 <= "11111001"; --1
 		when "0010" => disp8 <= "10100100"; --2
@@ -303,7 +326,7 @@ end if;
 		when others => disp8 <= "11111111"; --APAGADO
 	end case;
 
-		case qr(15 downto 12) is
+		case binario_aleatorio(15 downto 12) is
 		when "0000" => disp7 <= "11000000"; --0
 		when "0001" => disp7 <= "11111001"; --1
 		when "0010" => disp7 <= "10100100"; --2
