@@ -65,7 +65,7 @@ end component;
 component countdowni is
 	port(clock : in STD_LOGIC;
 			q_n, q : out STD_LOGIC_VECTOR(7 downto 0);
-			btn3 : in STD_LOGIC);
+			btn3, system_reset : in STD_LOGIC);
 end component;
 
 
@@ -76,7 +76,7 @@ end component;
 
 
 component rand_gen is
-    Port ( clk, clock, clock_2, clock_3, clock_4, btn3 : in  STD_LOGIC;
+    Port ( clk, clock, clock_2, clock_3, clock_4, btn3, system_reset : in  STD_LOGIC;
            q_n, q : out  STD_LOGIC_VECTOR (15 downto 0));
 end component;
 
@@ -130,7 +130,8 @@ countdown : component countdowni
 		clock => clk_1,
 		q_n => q_nc,
 		q => qc,
-		btn3 => btn3);
+		btn3 => btn3,
+		system_reset => system_reset);
 				
 gerador : component rand_gen
 	port map(
@@ -141,7 +142,8 @@ gerador : component rand_gen
 		clock_4 => clk_5,
 		q_n => q_nr,
 		q => qr,
-		btn3 => btn3);
+		btn3 => btn3,
+		system_reset => system_reset);
 
 led <= qr;
 an <= an_s1;
@@ -155,11 +157,14 @@ cx1 <= cx_s2;
 
 binario_aleatorio(15) <= '0'; -- Bit mais significativo zerado
 
-process(clk_250)
+process(clk_250, system_reset)
 variable conta4 : integer := 1 ;
 begin
-
-	if rising_edge(clk_250) then
+	if (system_reset = '1') then
+		conta4 := 1;
+		cx_s1 <= "11111111";
+		an_s1 <= "1111";
+	elsif rising_edge(clk_250) then
 	
 		if(conta4 = 1) then
 			cx_s1 <= disp6; 	--3
@@ -186,11 +191,14 @@ begin
 	end if;
 end process;
 
-process(clk_250)
+process(clk_250, system_reset)
 variable conta8 : integer := 1 ;
 begin
-
-	if rising_edge(clk_250) then
+	if (system_reset = '1') then
+		conta8 := 1;
+		cx_s2 <= "11111111";
+		an_s2 <= "1111";
+	elsif rising_edge(clk_250) then
 	
 		if(conta8 = 1) then
 			cx_s2 <= disp7;		--8
@@ -217,10 +225,12 @@ begin
 end process;
 
 
-process(clk_250, qc, qr, chave, binario_aleatorio, sw_s, confirmador)
+process(clk_250, qc, qr, chave, binario_aleatorio, sw_s, confirmador, system_reset)
 	begin
 		
-	if (btn1 = '1' ) then
+	if (system_reset = '1') then
+		chave <= '1';
+	elsif (btn1 = '1' ) then
 		chave <= '0';
 	end if;
 

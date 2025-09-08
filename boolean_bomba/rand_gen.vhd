@@ -30,7 +30,7 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity rand_gen is
-    Port ( clk, clock, clock_2, clock_3, clock_4, btn3 : in  STD_LOGIC;
+    Port ( clk, clock, clock_2, clock_3, clock_4, btn3, system_reset : in  STD_LOGIC;
            q_n, q : out  STD_LOGIC_VECTOR (15 downto 0));
 end rand_gen;
 
@@ -74,12 +74,17 @@ reset2_10000 <= '1' when (qs(15) = '0' and qs(14) = '0' and qs(13) = '1' and qs(
                          qs(3) = '1' and qs(2) = '0' and qs(1) = '0' and qs(0) = '0') else '0'; -- bits 3-0
 
 
-process(btn3, clk)
+process(btn3, clk, system_reset)
 begin
-	if (btn3 = '1') then
+	if (system_reset = '1') then
+		verify1 <= '1';
+	elsif (btn3 = '1') then
 		verify1 <= '0';
 	end if;
 end process;
+
+-- switch1 não é usado neste componente, mantido para compatibilidade
+switch1 <= '0';
 
 	milhar : component ffjk4
 	port map(
@@ -117,10 +122,10 @@ end process;
 
 q_n <= q_ns;
 q <= qs;
-reset_un <= switch1 or reset1_10000 or reset2_10000;
-reset_dec <= switch1 or reset1_10000 or reset2_10000;
-reset_cen <= switch1 or reset1_10000 or reset2_10000;
-reset_mil <= switch1 or reset1_10000 or reset2_10000;
+reset_un <= switch1 or reset1_10000 or reset2_10000 or system_reset;
+reset_dec <= switch1 or reset1_10000 or reset2_10000 or system_reset;
+reset_cen <= switch1 or reset1_10000 or reset2_10000 or system_reset;
+reset_mil <= switch1 or reset1_10000 or reset2_10000 or system_reset;
 
 
 

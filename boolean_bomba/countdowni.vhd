@@ -33,7 +33,7 @@ use IEEE.NUMERIC_STD.ALL;
 entity countdowni is
 	port(clock : in STD_LOGIC;
 			q_n, q : out STD_LOGIC_VECTOR(7 downto 0);
-			btn3 : in STD_LOGIC);
+			btn3, system_reset : in STD_LOGIC);
 end countdowni;
 
 architecture Behavioral of countdowni is
@@ -91,8 +91,8 @@ verify_seg <= not(qs(6) and  qs(0) and (not qs(1)) and (not qs(2)) and (not qs(3
 
 q_n <= q_ns;
 q <= qs;
-reset_seg <= switch1 or (qs(3) and qs(1));
-reset_dez <= switch1 or (qs(7) and qs(6));
+reset_seg <= switch1 or (qs(3) and qs(1)) or system_reset;
+reset_dez <= switch1 or (qs(7) and qs(6)) or system_reset;
 
 
 end Behavioral;

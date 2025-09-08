@@ -3,6 +3,7 @@ bomba_new/
 
 # Excluir arquivos .ucf
 *.ucf
+*.rar
 
 # Arquivos temporários e de compilação
 *.log
