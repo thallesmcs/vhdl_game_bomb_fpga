@@ -235,18 +235,19 @@ process(clk_250, qc, qr, chave, binario_aleatorio, sw_s, confirmador, system_res
 	end if;
 
 	-- Quando o tempo chega a 00 (zero), mostrar FF nos displays 0, 1, 5 e 6
-	if(qc = "00000000") then
-		disp0 <= "10001110"; --FF
-		disp1 <= "10001110"; --FF
-		disp5 <= "10001110"; --FF
-		disp6 <= "10001110"; --FF
-	elsif(qc = "0000000001000001") then
+	-- if(qc = "00000000") then
+	-- 	disp0 <= "10001110"; --FF
+	-- 	disp1 <= "10001110"; --FF
+	-- 	disp5 <= "10001110"; --FF
+	-- 	disp6 <= "10001110"; --FF
+	if(qc = "0000000001000001") then
 		disp0 <= "10001110"; 
 		disp1 <= "10001110"; 
 		disp5 <= "10001110"; 
 		disp6 <= "10001110";
-	else
-	
+
+	end if;
+
 	if(chave = '1') then
 		-- Durante a contagem, disp5 e disp6 ficam apagados (tudo 1)
 		disp5 <= "11111111"; --APAGADO
@@ -291,7 +292,7 @@ process(clk_250, qc, qr, chave, binario_aleatorio, sw_s, confirmador, system_res
 								disp6 <= "11111111";
 		end case;
 	end if;
-end if;
+
 
 
 	case binario_aleatorio(3 downto 0) is
