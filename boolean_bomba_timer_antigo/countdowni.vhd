@@ -38,12 +38,24 @@ end countdowni;
 
 architecture Behavioral of countdowni is
 
-signal qs : STD_LOGIC_VECTOR(7 downto 0);
-signal switch1 : STD_LOGIC;
-signal unidade, dezena : STD_LOGIC_VECTOR(3 downto 0);
-signal countdown_finished : STD_LOGIC;
+signal reset_dez : STD_LOGIC;
+signal reset_seg : STD_LOGIC;
+signal q_ns, qs : STD_LOGIC_VECTOR(7 downto 0);
+signal switch1, btn_s : STD_LOGIC;
+signal verify_seg, verify_dez : STD_LOGIC;
+
+
+
+component ffjk4 is
+    Port (clock, reset : in  STD_LOGIC;
+           verify : in  STD_LOGIC;
+           q, q_n : out  STD_LOGIC_VECTOR (3 downto 0));
+end component;
+
 
 begin
+
+
 
 process(btn3)
 begin
@@ -54,38 +66,33 @@ begin
 	end if;
 end process;
 
-process(clock, system_reset, switch1)
-begin
-	if (system_reset = '1' or switch1 = '1') then
-		dezena <= "0100";  -- 4
-		unidade <= "0101"; -- 5
-		countdown_finished <= '0';
+
+verify_dez <= ((not qs(0)) and (not qs(1)) and (not qs(2)) and (not qs(3))) and (not qs(6));
+verify_seg <= not(qs(6) and  qs(0) and (not qs(1)) and (not qs(2)) and (not qs(3)));
+
+
+	dez_segundos : component ffjk4
+	port map(
+		clock => clock,
+		reset => reset_dez,
+		q_n => q_ns(7 downto 4),
+		verify => verify_dez,
+		q => qs(7 downto 4));
 		
-	elsif (rising_edge(clock)) then
-		if (countdown_finished = '0') then
 
-			if (dezena = "0000" and unidade = "0000") then			-- Verificar se chegou a 00
-				countdown_finished <= '1';
-			else
-				
-				if (unidade = "0000") then		-- Decrementar unidade
-					
-					unidade <= "1001"; -- Se unidade é 0, vai para 9 e decrementa dezena
-					if (dezena > "0000") then
-						dezena <= std_logic_vector(unsigned(dezena) - 1);
-					end if;
-				else
-					
-					unidade <= std_logic_vector(unsigned(unidade) - 1); 	-- Decrementar unidade normalmente
-				end if;
-			end if;
-		end if;
-	end if;
-end process;
+	segundos : component ffjk4
+	port map(
+		clock => clock,
+		reset => reset_seg,
+		q_n => q_ns(3 downto 0),
+		verify => verify_seg,
+		q => qs(3 downto 0));
+		
 
-qs <= dezena & unidade;  -- Concatenar
+q_n <= q_ns;
 q <= qs;
-q_n <= not qs;
+reset_seg <= switch1 or (qs(3) and qs(1)) or system_reset;
+reset_dez <= switch1 or (qs(7) and qs(6)) or system_reset;
 
 
 end Behavioral;

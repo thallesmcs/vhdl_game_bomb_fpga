@@ -53,8 +53,7 @@ signal an_s2 : STD_LOGIC_VECTOR(3 downto 0);
 signal cx_s2 : STD_LOGIC_VECTOR(7 downto 0);
 signal disp5, disp6, disp7, disp8 : STD_LOGIC_VECTOR(7 downto 0);
 signal disp0, disp1, disp2, disp3 : STD_LOGIC_VECTOR(7 downto 0);
-signal confirmador : STD_LOGIC := '0';
-signal btn_s: STD_LOGIC;
+signal confirmador, btn_s: STD_LOGIC;
 signal chave: STD_LOGIC := '1';
 
 component div_f is
@@ -84,9 +83,8 @@ end component;
 
 component comparator is
     Port ( a, b : in  STD_LOGIC_VECTOR (15 downto 0);
-			btn1 : in STD_LOGIC;
-		   reset : in STD_LOGIC;           
-			comp : out  STD_LOGIC);
+				btn1 : in STD_LOGIC;
+           comp : out  STD_LOGIC);
 end component;
 
 
@@ -110,7 +108,6 @@ comparador : component comparator
 		a => qr,
 		b => sw_s,
 		btn1 => btn1,
-		reset => system_reset,
 		comp => confirmador);
 
 switch_map : component swf 
@@ -154,7 +151,6 @@ sw_s <= switch;
 cx <= cx_s1;
 an1 <= an_s2;
 cx1 <= cx_s2;
-
 -- qr <= "0001101110001011"; -- Decimal: 7051 -- BCD: 0111 0000 0101 0001 Binario: 0001101110001011
 -- qr <= "0000001000100110";
 -- qr <= "0000000000000001";
@@ -238,56 +234,62 @@ process(clk_250, qc, qr, chave, binario_aleatorio, sw_s, confirmador, system_res
 		chave <= '0';
 	end if;
 
-	-- Quando o tempo chega a 00 (zero), mostra FF
-	if(qc = "00000000" and confirmador = '0') then
-		disp0 <= "10001110"; --FF
-		disp1 <= "10001110"; --FF
-		disp5 <= "10001110"; --FF
-		disp6 <= "10001110"; --FF
+	-- Quando o tempo chega a 00 (zero), mostrar FF nos displays 0, 1, 5 e 6
+	-- if(qc = "00000000") then
+	-- 	disp0 <= "10001110"; --FF
+	-- 	disp1 <= "10001110"; --FF
+	-- 	disp5 <= "10001110"; --FF
+	-- 	disp6 <= "10001110"; --FF
+	if(qc = "0000000001000001") then
+		disp0 <= "10001110"; 
+		disp1 <= "10001110"; 
+		disp5 <= "10001110"; 
+		disp6 <= "10001110";
 
-	elsif(chave = '1') then
-		-- Durante a contagem, disp5 e disp6 ficam apagados
+	end if;
+
+	if(chave = '1') then
+		-- Durante a contagem, disp5 e disp6 ficam apagados (tudo 1)
 		disp5 <= "11111111"; --APAGADO
 		disp6 <= "11111111"; --APAGADO
 		
 		case qc(3 downto 0) is
 			when "0000" => disp0 <= "11000000"; --0
-			when "0001" => disp0 <= "11111001"; --1
-			when "0010" => disp0 <= "10100100"; --2
-			when "0011" => disp0 <= "10110000"; --3
-			when "0100" => disp0 <= "10011001"; --4
+			when "0001" => disp0 <= "10010000"; --9
+			when "0010" => disp0 <= "10000000"; --8
+			when "0011" => disp0 <= "11111000"; --7
+			when "0100" => disp0 <= "10000010"; --6
 			when "0101" => disp0 <= "10010010"; --5
-			when "0110" => disp0 <= "10000010"; --6
-			when "0111" => disp0 <= "11111000"; --7
-			when "1000" => disp0 <= "10000000"; --8
-			when "1001" => disp0 <= "10010000"; --9
+			when "0110" => disp0 <= "10011001"; --4
+			when "0111" => disp0 <= "10110000"; --3
+			when "1000" => disp0 <= "10100100"; --2
+			when "1001" => disp0 <= "11111001"; --1
 			when others => disp0 <= "11111111"; --APAGADO
 		end case;
 			
 		case qc(7 downto 4) is
-			when "0000" => disp1 <= "11000000"; --0
-			when "0001" => disp1 <= "11111001"; --1
-			when "0010" => disp1 <= "10100100"; --2
-			when "0011" => disp1 <= "10110000"; --3
-			when "0100" => disp1 <= "10011001"; --4
+			when "0000" => disp1 <= "10110000"; --3
+			when "0001" => disp1 <= "10100100"; --2
+			when "0010" => disp1 <= "11111001"; --1
+			when "0011" => disp1 <= "11000000"; --0
 			when others => disp1 <= "11111111"; --APAGADO
 		end case;
 	elsif(chave = '0') then
 		case confirmador is
 			when '0' => disp0 <= "10001110"; --FF
-						disp1 <= "10001110"; --FF
-						disp5 <= "10001110"; --FF
-						disp6 <= "10001110"; --FF
-
+							disp1 <= "10001110"; --FF
+							-- Quando disp0 e disp1 são FF, disp5 e disp6 também são FF
+							disp5 <= "10001110"; --FF
+							disp6 <= "10001110"; --FF
 			when '1' => disp0 <= "10000010"; --GG
-						disp1 <= "10000010"; --GG
-						disp5 <= "10000010"; --GG
-						disp6 <= "10000010"; --GG
-
-			when others => 	disp1 <= "11111111";	--APAGADO
-							disp0 <= "11111111"; 	--APAGADO
-							disp5 <= "11111111"; 	--APAGADO
-							disp6 <= "11111111"; 	--APAGADO
+							disp1 <= "10000010"; --GG
+							-- Quando disp0 e disp1 são GG, disp5 e disp6 também são GG
+							disp5 <= "10000010"; --GG
+							disp6 <= "10000010"; --GG
+			when others => disp1 <= "11111111";
+								disp0 <= "11111111";
+								disp5 <= "11111111";
+								disp6 <= "11111111";
 		end case;
 	end if;
 
@@ -350,6 +352,8 @@ process(clk_250, qc, qr, chave, binario_aleatorio, sw_s, confirmador, system_res
 	end case;
 	
 end process;
+
+
 
 end Behavioral;
 
