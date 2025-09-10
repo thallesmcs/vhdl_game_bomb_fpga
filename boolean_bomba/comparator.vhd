@@ -33,7 +33,7 @@ entity comparator is
     Port ( a, b : in  STD_LOGIC_VECTOR (15 downto 0);
            btn1 : in STD_LOGIC;
            reset : in STD_LOGIC;
-		   led : out STD_LOGIC;
+		--    led : out STD_LOGIC;
            comp : out  STD_LOGIC);
 end comparator;
 
@@ -59,7 +59,7 @@ begin
 	end if;
 end process;
 
-led <= jogo;
+-- led <= jogo;
 
 end Behavioral;
 

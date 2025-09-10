@@ -56,7 +56,7 @@ signal disp0, disp1, disp2, disp3 : STD_LOGIC_VECTOR(7 downto 0);
 signal confirmador : STD_LOGIC := '0';
 signal btn_s: STD_LOGIC;
 signal chave: STD_LOGIC := '1';
-signal led_s1 : STD_LOGIC;
+-- signal led_s1 : STD_LOGIC;
 
 component div_f is
     Port (clk_d, reset : in STD_LOGIC;
@@ -87,8 +87,8 @@ component comparator is
     Port ( a, b : in  STD_LOGIC_VECTOR (15 downto 0);
 			btn1 : in STD_LOGIC;
 		   	reset : in STD_LOGIC;     
-		   	led : out  STD_LOGIC;      
-			comp : out  STD_LOGIC);
+		   	-- led : out  STD_LOGIC;      
+			comp : out  STD_LOGIC); 
 end component;
 
 
@@ -113,7 +113,7 @@ comparador : component comparator
 		b => sw_s,
 		btn1 => btn1,
 		reset => system_reset,
-		led => led_s1,
+		-- led => led_s1,
 		comp => confirmador);
 
 switch_map : component swf 
@@ -151,8 +151,9 @@ gerador : component rand_gen
 		btn3 => btn3,
 		system_reset => system_reset);
 
-led (14 downto 0) <= qr (14 downto 0);
-led (15) <= led_s1;
+-- led (14 downto 0) <= qr (14 downto 0);
+-- led (15) <= led_s1;
+led <= led_s;
 an <= an_s1;
 sw_s <= switch;
 cx <= cx_s1;

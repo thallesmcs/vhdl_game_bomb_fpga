@@ -81,3 +81,4 @@ set_property -dict {PACKAGE_PIN C1 IOSTANDARD LVCMOS33} [get_ports {cx1[7]}]
 
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets btn1_IBUF]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets btn3_IBUF]
+set_property CONFIG_MODE SPIx4 [current_design]
