@@ -33,12 +33,14 @@ entity comparator is
     Port ( a, b : in  STD_LOGIC_VECTOR (15 downto 0);
            btn1 : in STD_LOGIC;
            reset : in STD_LOGIC;
+		   led : out STD_LOGIC;
            comp : out  STD_LOGIC);
 end comparator;
 
 architecture Behavioral of comparator is
 
 signal final, comp_s : STD_LOGIC;
+signal jogo : STD_LOGIC := '0';
 
 begin
 
@@ -48,10 +50,16 @@ process(btn1, reset)
 begin
 	if (reset = '1') then
 		comp <= '0';
+		jogo <= '0';
 	elsif (btn1 = '1') then
-		comp <= comp_s;
+		if (jogo = '0') then -- Só executa se ainda não confirmou o jogo
+			comp <= comp_s;
+			jogo <= '1';
+		end if;
 	end if;
 end process;
+
+led <= jogo;
 
 end Behavioral;
 
